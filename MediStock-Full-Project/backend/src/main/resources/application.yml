@@ -1,0 +1,62 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: medistock-backend
+
+  profiles:
+    active: mysql
+
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: UTC
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+medistock:
+  jwt:
+    secret: ${JWT_SECRET:c2VjcmV0LWtleS1mb3ItbWVkaXN0b2NrLWFwcC1jaGFuZ2UtdGhpcy1pbi1wcm9kdWN0aW9uLTEyMzQ1Ng==}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}          # 24h access token
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000} # 7 days refresh token
+  alerts:
+    low-stock-threshold: 20
+    expiry-warning-days: 30
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:3000}
+  bootstrap:
+    admin-email: ${ADMIN_EMAIL:admin@medistock.com}
+    admin-password: ${ADMIN_PASSWORD:Admin@123}
+    seed-demo-inventory: ${SEED_DEMO_INVENTORY:true}
+
+springdoc:
+  api-docs:
+    path: /docs/api-docs
+  swagger-ui:
+    path: /docs/swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    mail:
+      enabled: false
