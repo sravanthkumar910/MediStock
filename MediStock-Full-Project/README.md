@@ -87,19 +87,63 @@ If any rows are returned, back up first and reconcile those batches and their st
 
 For an upgrade, pull the reviewed source and rebuild the app services with the same Compose command. Do not use `docker compose down -v`; it deletes the persistent database volume. Restrict access to `.env.production` and store database backups off-site.
 
-## Deploy to Render
+## Deploy to Render (Beginner Guide)
 
-Render provides managed PostgreSQL, not MySQL. This backend uses the MySQL driver and MySQL profile, so keep the current database engine and provision an externally reachable MySQL 8 database with TLS and an IP allowlist that permits the Render service. Migrating to Render Postgres requires a separate database-driver, configuration, and migration change.
+Render can host the frontend and Spring backend. This project uses MySQL, so create a separate MySQL 8 database with a provider that allows connections from Render and supports the TLS mode required by that provider. Do not choose PostgreSQL unless you intend to migrate the backend and database schema.
 
-Push this project folder to a Git provider and create two Render services from that repository:
+Before using a free/shared database, confirm that remote connections from Render are allowed, note the provider's TLS instructions, and check its data limits and backup policy. Do not store real patient or other sensitive personal data on an unverified free database. Rotate any exposed database password before deployment and never commit credentials to source control.
 
-1. Create a **Web Service** for the API using the Docker runtime. Set the Dockerfile path to `backend/Dockerfile`, the Docker context to `backend`, and the health check path to `/api/actuator/health`. The API now listens on Render's assigned `PORT` and falls back to 8080 locally.
-2. Set these API environment variables in Render: `SPRING_PROFILES_ACTIVE=mysql`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CORS_ORIGINS`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `SEED_DEMO_INVENTORY=false`. Use the MySQL provider's external host/port and credentials. Generate a strong base64 JWT secret with `openssl rand -base64 48`; enter secrets in Render's dashboard, not in source control.
-3. Create a **Static Site** for the frontend from the same repository. Use build command `cd frontend && npm ci && npm run build`, publish directory `frontend/dist`, and set the build environment variable `VITE_API_BASE_URL` to `https://<your-api-service>.onrender.com/api`.
-4. Add a rewrite route from `/*` to `/index.html` for client-side routes. After Render assigns the frontend URL, set the backend's `CORS_ORIGINS` to that exact origin, then redeploy the API.
-5. Verify the API at `https://<your-api-service>.onrender.com/api/actuator/health`, sign in, and test medicine create/edit plus a repeated name-and-batch submission.
+### 1. Push this project to GitHub
 
-Keep the database and API in the same region where possible. Before deployment, back up any existing database and check for duplicate medicine/batch pairs using the preflight query above; the unique index will reject a database that still contains duplicates. See [Render's database options](https://render.com/docs/databases), [Docker services](https://render.com/docs/docker), and [static sites](https://render.com/docs/static-sites).
+Create a GitHub repository for the `MediStock/MediStock-Full-Project` folder and push the project. Do not commit `.env.production`, database passwords, JWT secrets, or administrator passwords. Render will read the source from GitHub.
+
+### 2. Prepare the MySQL database
+
+Create a MySQL 8 database with your provider. Keep the connection details available: host, port, database name, username, and a newly rotated password. Confirm whether the provider requires TLS and whether it requires an IP allowlist for Render.
+
+### 3. Deploy the backend first
+
+In Render, select **New +** > **Web Service**, connect your GitHub repository, and configure:
+
+- Root Directory: `backend`
+- Runtime: **Docker**
+- Dockerfile Path: `Dockerfile`
+- Health Check Path: `/api/actuator/health`
+
+Under the backend service's **Environment** settings, add the following. Enter the host, port, database name, and username from your database provider. Enter the rotated database password directly in Render; never put it in project files or source control.
+
+| Key | Value |
+| --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `mysql` |
+| `DB_HOST` | MySQL provider host |
+| `DB_PORT` | MySQL provider port, commonly `3306` |
+| `DB_NAME` | MySQL database name |
+| `DB_USERNAME` | MySQL database username |
+| `DB_PASSWORD` | Newly rotated MySQL password |
+| `DB_SSL_MODE` | TLS mode required by the provider; use `REQUIRED` only if supported |
+| `JWT_SECRET` | A unique secret generated with `openssl rand -base64 48` |
+| `CORS_ORIGINS` | Set after creating the frontend service |
+| `ADMIN_EMAIL` | Email for your first administrator |
+| `ADMIN_PASSWORD` | A strong initial administrator password |
+| `SEED_DEMO_INVENTORY` | `false` |
+
+Deploy the backend and wait for it to report healthy. Copy its Render URL. Check `https://<backend-url>/api/actuator/health`; the response should report `UP`. If the database connection fails, check the provider's remote-access and TLS requirements before changing the SSL mode.
+
+### 4. Deploy the frontend
+
+In Render, select **New +** > **Static Site** and connect the same GitHub repository. Configure:
+
+- Root Directory: `frontend`
+- Build Command: `npm ci && npm run build`
+- Publish Directory: `dist`
+
+Set the build environment variable `VITE_API_BASE_URL` to the backend URL ending in `/api`, for example `https://medistock-api.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
+
+### 5. Connect and test the services
+
+Return to the backend's Render **Environment** settings. Set `CORS_ORIGINS` to the frontend origin exactly, including `https://` and without a trailing slash, then redeploy the backend. Open the frontend URL and sign in using the administrator credentials you configured. Test creating and editing a medicine.
+
+The first administrator is created only when the users table is empty. Back up your database regularly. The browser frontend calls the Spring API; it must not connect directly to MySQL. For Render's service settings, see [Docker web services](https://render.com/docs/docker) and [static sites](https://render.com/docs/static-sites).
 
 ## Run Services Individually
 
