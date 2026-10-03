@@ -105,7 +105,7 @@ Create a MySQL 8 database with your provider. Keep the connection details availa
 
 In Render, select **New +** > **Web Service**, connect your GitHub repository, and configure:
 
-- Root Directory: `backend`
+- Root Directory: `MediStock-Full-Project/backend`
 - Runtime: **Docker**
 - Dockerfile Path: `Dockerfile`
 - Health Check Path: `/api/actuator/health`
@@ -133,11 +133,11 @@ Deploy the backend and wait for it to report healthy. Copy its Render URL. Check
 
 In Render, select **New +** > **Static Site** and connect the same GitHub repository. Configure:
 
-- Root Directory: `frontend`
+- Root Directory: `MediStock-Full-Project/frontend`
 - Build Command: `npm ci && npm run build`
 - Publish Directory: `dist`
 
-Set the build environment variable `VITE_API_BASE_URL` to the backend URL ending in `/api`, for example `https://medistock-api.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
+Set the build environment variable `VITE_API_BASE_URL` to `https://medistock-7.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
 
 ### 5. Connect and test the services
 
