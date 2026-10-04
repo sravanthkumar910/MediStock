@@ -122,7 +122,7 @@ Under the backend service's **Environment** settings, add the following. Enter t
 | `DB_PASSWORD` | Newly rotated MySQL password |
 | `DB_SSL_MODE` | TLS mode required by the provider; use `REQUIRED` only if supported |
 | `JWT_SECRET` | A unique secret generated with `openssl rand -base64 48` |
-| `CORS_ORIGINS` | Set after creating the frontend service |
+| `CORS_ORIGINS` | `https://medistock-web-management.netlify.app` |
 | `ADMIN_EMAIL` | Email for your first administrator |
 | `ADMIN_PASSWORD` | A strong initial administrator password |
 | `SEED_DEMO_INVENTORY` | `false` |
@@ -137,11 +137,11 @@ In Render, select **New +** > **Static Site** and connect the same GitHub reposi
 - Build Command: `npm ci && npm run build`
 - Publish Directory: `dist`
 
-Set the build environment variable `VITE_API_BASE_URL` to `https://medistock-web-management.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
+Set the build environment variable `VITE_API_BASE_URL` to `https://medistock-web-management.onrender.com` (the frontend adds the `/api` path automatically). Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
 
 ### 5. Connect and test the services
 
-Return to the backend's Render **Environment** settings. Set `CORS_ORIGINS` to the frontend origin exactly, including `https://` and without a trailing slash, then redeploy the backend. Open the frontend URL and sign in using the administrator credentials you configured. Test creating and editing a medicine.
+Return to the backend's Render **Environment** settings. Set `CORS_ORIGINS=https://medistock-web-management.netlify.app` (the frontend origin exactly, including `https://` and without a trailing slash), then redeploy the backend. Open the frontend URL and sign in using the administrator credentials you configured. Test creating and editing a medicine.
 
 The first administrator is created only when the users table is empty. Back up your database regularly. The browser frontend calls the Spring API; it must not connect directly to MySQL. For Render's service settings, see [Docker web services](https://render.com/docs/docker) and [static sites](https://render.com/docs/static-sites).
 
