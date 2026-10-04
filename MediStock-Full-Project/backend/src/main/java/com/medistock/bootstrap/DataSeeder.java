@@ -20,8 +20,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Seeds a default Admin account on first startup so the app is usable
- * immediately without a manual SQL insert.
+ * Ensures an Admin account exists for ADMIN_EMAIL on every startup so the app
+ * is usable without a manual SQL insert. Set ADMIN_RESET_PASSWORD=true to reset
+ * that account's password to ADMIN_PASSWORD on the next startup.
  *
  * Default login (CHANGE THE PASSWORD after first login in production):
  *   email:    admin@medistock.com
@@ -43,21 +44,30 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${medistock.bootstrap.admin-password}")
     private String adminPassword;
 
+    @Value("${medistock.bootstrap.admin-reset-password:false}")
+    private boolean resetAdminPassword;
+
     @Value("${medistock.bootstrap.seed-demo-inventory:true}")
     private boolean seedDemoInventoryEnabled;
 
     @Override
     public void run(String... args) {
-        if (userRepository.count() == 0) {
-            User admin = User.builder()
-                    .fullName("System Administrator")
-                    .email(adminEmail)
-                    .password(passwordEncoder.encode(adminPassword))
-                    .role(RoleName.ADMIN)
-                    .enabled(true)
-                    .build();
-            userRepository.save(admin);
-        }
+        String email = adminEmail.trim();
+        userRepository.findByEmail(email).ifPresentOrElse(existing -> {
+            // Lets an operator recover access by setting ADMIN_RESET_PASSWORD=true and restarting.
+            if (resetAdminPassword) {
+                existing.setPassword(passwordEncoder.encode(adminPassword));
+                existing.setRole(RoleName.ADMIN);
+                existing.setEnabled(true);
+                userRepository.save(existing);
+            }
+        }, () -> userRepository.save(User.builder()
+                .fullName("System Administrator")
+                .email(email)
+                .password(passwordEncoder.encode(adminPassword))
+                .role(RoleName.ADMIN)
+                .enabled(true)
+                .build()));
         if (seedDemoInventoryEnabled) seedDemoInventory();
     }
 

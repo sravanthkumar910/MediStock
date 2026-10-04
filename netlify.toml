@@ -1,0 +1,9 @@
+[build]
+  base = "MediStock-Full-Project/frontend"
+  command = "npm ci --include=dev && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  VITE_API_BASE_URL = "https://medistock-web-management.onrender.com"
+  VITE_API_PROXY = "true"
