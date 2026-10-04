@@ -137,7 +137,7 @@ In Render, select **New +** > **Static Site** and connect the same GitHub reposi
 - Build Command: `npm ci && npm run build`
 - Publish Directory: `dist`
 
-Set the build environment variable `VITE_API_BASE_URL` to `https://medistock-7.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
+Set the build environment variable `VITE_API_BASE_URL` to `https://medistock-web-management.onrender.com/api`. Add a rewrite rule from `/*` to `/index.html`, then deploy. Copy the frontend URL.
 
 ### 5. Connect and test the services
 

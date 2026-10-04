@@ -1,2 +1,2 @@
-/api/*  https://medistock-7.onrender.com/api/:splat  200
+/api/*  https://medistock-web-management.onrender.com/api/:splat  200
 /*      /index.html                                  200

@@ -5,3 +5,4 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_API_BASE_URL = "https://medistock-web-management.onrender.com/api"
