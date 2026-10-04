@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 // The backend serves every route under /api, so append it if the configured URL omits it.
-const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '')
+// On Netlify, VITE_API_PROXY routes calls through the same-origin /api edge proxy to avoid CORS.
+const RAW_BASE_URL = (import.meta.env.VITE_API_PROXY === 'true' ? '/api' : import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '')
 const BASE_URL = RAW_BASE_URL.endsWith('/api') ? RAW_BASE_URL : `${RAW_BASE_URL}/api`
 export const ACCESS_TOKEN_KEY = 'accessToken'
 export const REFRESH_TOKEN_KEY = 'refreshToken'
