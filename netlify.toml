@@ -1,0 +1,7 @@
+[build]
+  base = "MediStock-Full-Project/frontend"
+  command = "npm ci --include=dev && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
