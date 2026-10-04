@@ -122,9 +122,10 @@ Under the backend service's **Environment** settings, add the following. Enter t
 | `DB_PASSWORD` | Newly rotated MySQL password |
 | `DB_SSL_MODE` | TLS mode required by the provider; use `REQUIRED` only if supported |
 | `JWT_SECRET` | A unique secret generated with `openssl rand -base64 48` |
-| `CORS_ORIGINS` | `https://medistock-web-management.netlify.app` |
+| `CORS_ORIGINS` | `https://medistock-web-management.netlify.app,https://*--medistock-web-management.netlify.app` (the second entry allows deploy previews) |
 | `ADMIN_EMAIL` | Email for your first administrator |
 | `ADMIN_PASSWORD` | A strong initial administrator password |
+| `ADMIN_RESET_PASSWORD` | `false`; set to `true` once to reset the admin password to `ADMIN_PASSWORD` on the next restart |
 | `SEED_DEMO_INVENTORY` | `false` |
 
 Deploy the backend and wait for it to report healthy. Copy its Render URL. Check `https://<backend-url>/api/actuator/health`; the response should report `UP`. If the database connection fails, check the provider's remote-access and TLS requirements before changing the SSL mode.
