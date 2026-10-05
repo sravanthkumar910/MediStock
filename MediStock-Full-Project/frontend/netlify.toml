@@ -1,0 +1,2 @@
+[build.environment]
+  VITE_API_BASE_URL = "https://medistock-web-management-eez2.onrender.com/api"
