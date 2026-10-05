@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const configuredBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').trim().replace(/\/+$/, '') || '/api'
+const BASE_URL = /^https?:\/\/[^/]+$/i.test(configuredBaseUrl) ? `${configuredBaseUrl}/api` : configuredBaseUrl
 export const ACCESS_TOKEN_KEY = 'accessToken'
 export const REFRESH_TOKEN_KEY = 'refreshToken'
 
