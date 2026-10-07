@@ -42,7 +42,11 @@ export function DataProvider({ children }) {
       if (medicineResult.status === "fulfilled") setMedicines((medicineResult.value.data.content || []).map(normalizeMedicine));
       if (supplierResult.status === "fulfilled") setSuppliers((supplierResult.value.data || []).map(normalizeSupplier));
       if (notificationResult.status === "fulfilled") setNotifications((notificationResult.value.data.content || []).map(normalizeNotification));
-      if (categoryResult.status === "fulfilled") setCategories(Array.isArray(categoryResult.value.data) ? categoryResult.value.data : categoryResult.value.data?.content || []);
+      if (categoryResult.status === "fulfilled") {
+        setCategories(Array.isArray(categoryResult.value.data) ? categoryResult.value.data : categoryResult.value.data?.content || []);
+      } else if (categoryResult.status === "rejected") {
+        throw new Error(categoryResult.reason.response?.data?.message || "Failed to load categories.");
+      }
 
       let resultIndex = 4;
       if (isAdmin) {
@@ -60,7 +64,7 @@ export function DataProvider({ children }) {
 
       if (results.every((result) => result.status === "rejected")) throw results[0].reason;
     } catch (loadError) {
-      setError(loadError.response?.data?.message || "Could not load data from the backend.");
+      setError(loadError.response?.data?.message || loadError.message || "Could not load data from the backend.");
     } finally {
       setLoading(false);
     }

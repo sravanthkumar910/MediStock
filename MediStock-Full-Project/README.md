@@ -87,6 +87,38 @@ If any rows are returned, back up first and reconcile those batches and their st
 
 For an upgrade, pull the reviewed source and rebuild the app services with the same Compose command. Do not use `docker compose down -v`; it deletes the persistent database volume. Restrict access to `.env.production` and store database backups off-site.
 
+## Deploy the Frontend to Netlify
+
+Netlify hosts the React/Vite frontend as a static site; it does not host this
+project's Spring Boot API or MySQL database. Deploy the backend and database
+separately first, and have the backend's HTTPS URL ready.
+
+1. Push the project to GitHub and create a Netlify site by importing that
+   repository. Netlify reads the root `netlify.toml`, which sets the frontend
+   base directory, build command, publish directory, and React Router fallback.
+2. In the Netlify site's **Environment variables**, add:
+
+   | Key | Value |
+   | --- | --- |
+   | `VITE_API_BASE_URL` | `https://<your-backend-host>/api` |
+
+   Use the backend's full HTTPS API URL. Do not use `/api` by itself for a
+   separately hosted backend, and do not put database credentials or other
+   secrets in `VITE_*` variables; frontend build variables are public.
+3. Trigger a deploy. In the backend host's environment settings, set
+   `CORS_ORIGINS` to the Netlify site origin exactly (for example,
+   `https://your-site.netlify.app`, with no trailing slash), then redeploy the
+   backend.
+4. Open the Netlify URL, sign in, and verify that inventory data loads. If the
+   browser reports a CORS error, check that `CORS_ORIGINS` exactly matches the
+   deployed site origin. If the API URL changes, update `VITE_API_BASE_URL` and
+   rebuild/redeploy the Netlify site.
+
+For a manual Netlify setup, use `frontend` as the base directory,
+`npm ci && npm run build` as the build command, and `dist` as the publish
+directory. The included redirect rule is required so direct visits to
+client-side routes resolve to the React app.
+
 ## Deploy to Render (Beginner Guide)
 
 Render can host the frontend and Spring backend. This project uses MySQL, so create a separate MySQL 8 database with a provider that allows connections from Render and supports the TLS mode required by that provider. Do not choose PostgreSQL unless you intend to migrate the backend and database schema.
